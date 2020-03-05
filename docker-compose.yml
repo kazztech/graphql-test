@@ -1,8 +1,25 @@
 version: "3"
 services:
+  db:
+    image: mysql:5.7
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+      TZ: "Asia/Tokyo"
+    volumes:
+      - ./docker/db/data:/var/lib/mysql
+      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/db/sql:/docker-entrypoint-initdb.d
+    ports:
+      - 33060:3306
+    networks:
+      - app-net
   app:
     build:
-      context: ./docker
+      context: ./docker/app
       dockerfile: Dockerfile-app
     image: app
     container_name: app
@@ -11,3 +28,12 @@ services:
     volumes:
       - ./app:/src
     command: [sh, -c, npm install && npm start]
+    networks:
+      - app-net
+
+volumes:
+  db-volume:
+
+networks:
+  app-net:
+    driver: bridge
